@@ -1,7 +1,5 @@
-'''
-Based on https://towardsdatascience.com/how-to-build-knn-from-scratch-in-python-5e22b8920bd2
-'''
-
+from sklearn import datasets
+from sklearn import decomposition
 import math
 import pandas as pd
 import numpy as np
@@ -11,15 +9,23 @@ from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from collections import Counter
 
-#loading and setting up the iris data set
 iris = datasets.load_iris()
 
-df = pd.DataFrame(data=iris.data, columns =iris.feature_names)
-df['target'] = iris.target
-df.head()
+X = iris.data
 
-X = df.drop('target',axis=1)
-y = df.target
+#not shown: using PCA to view explained variance. ~roughly 97% of variance was explained by first 2 compononets, so third one was dropped
+pca = decomposition.PCA(n_components=2)
+pca.fit(X)
+
+
+X = pca.transform(X)
+
+#
+X = pd.DataFrame(data=X)
+X['target'] = iris.target
+
+
+y = X.target
 
 #split a third of the training data into a validation set. Seed of 0
 X_train,  X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=0)
@@ -63,4 +69,3 @@ for flower in X_test.values:
     y_predict.append(getLabel(flower,15))
 
 score = accuracy_score(y_test,y_predict)
-
